@@ -3,6 +3,7 @@ from aiogram.utils import executor
 from create_bot import dp
 from handlers import client, common
 from db import olx_db, ria_db
+# from config.config_reader import load_config
 
 logging.basicConfig(level=logging.INFO)
 
