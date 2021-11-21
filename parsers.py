@@ -49,7 +49,6 @@ def olx(url='None', params=None):
                     try:
                         item_photo = item.find('img').get('src')
                     except TypeError:
-                        # continue
                         item_photo = 'Нет фото'
                     item_city = item.find('td', class_='bottom-cell').find('small', class_='breadcrumb x-normal'). \
                         find('span').text

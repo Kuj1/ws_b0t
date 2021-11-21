@@ -100,15 +100,23 @@ async def create_link_olx(message: types.Message, state: FSMContext):
 
     # Этот срез очень важен, его лучше не убирать иначе TypeError
     for check_items in result_olx[0: -1]:
-        parse_items = f'{hide_link(check_items["item_photo"])} ' \
-                      f'\n{hbold("Местоположение", ": ")}{check_items["item_city"]}' \
-                      f'\n{hbold("Наименование", ": ")}{check_items["item_title"]}' \
-                      f'\n{hbold("Цена", ": ")}{check_items["item_price"]}' \
-                      f'\n{hide_link(check_items["item_photo"])}'
+        try:
+            parse_items = f'{hide_link(check_items["item_photo"])} ' \
+                          f'\n{hbold("Местоположение", ": ")}{check_items["item_city"]}' \
+                          f'\n{hbold("Наименование", ": ")}{check_items["item_title"]}' \
+                          f'\n{hbold("Цена", ": ")}{check_items["item_price"]}' \
+                          f'\n{hide_link(check_items["item_photo"])}'
 
-        inline_kb_olx = InlineKeyboardMarkup()
-        inline_kb_olx.add(InlineKeyboardButton('Перейти по ссылке', url=f'{check_items["item_url"]}'))
-        await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_olx)
+            inline_kb_olx = InlineKeyboardMarkup()
+            inline_kb_olx.add(InlineKeyboardButton('Перейти по ссылке', url=f'{check_items["item_url"]}'))
+            await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_olx)
+
+        except KeyError:
+            parse_items = f'\n{hbold("Местоположение", ": ")}Неизвестно' \
+                          f'\n{hbold("Наименование", ": ")}Неизвестно' \
+                          f'\n{hbold("Цена", ": ")}Неизвестно' \
+
+            await message.answer(parse_items, parse_mode="HTML")
     await state.finish()
 
 
@@ -160,17 +168,24 @@ async def create_link_autoria(message: types.Message, state: FSMContext):
     result_ria = auto_ria(url=url_for_ria)
 
     for check_items in result_ria[0: -1]:
-        parse_items = f'{hide_link(check_items["item_photo"])} ' \
-                      f'\n{hbold("Местоположение", ": ")}{check_items["item_city"]}' \
-                      f'\n{hbold("Наименование", ": ")}{check_items["item_title"]}' \
-                      f'\n{hbold("Цена", ": ")}{check_items["item_price"]}' \
-                      f'\n{hbold("Ссылка", ": ")}{check_items["item_url"]}' \
-                      f'\n{hide_link(check_items["item_photo"])}'
+        try:
+            parse_items = f'{hide_link(check_items["item_photo"])} ' \
+                          f'\n{hbold("Местоположение", ": ")}{check_items["item_city"]}' \
+                          f'\n{hbold("Наименование", ": ")}{check_items["item_title"]}' \
+                          f'\n{hbold("Цена", ": ")}{check_items["item_price"]}' \
+                          f'\n{hide_link(check_items["item_photo"])}'
 
-        inline_kb_ria = InlineKeyboardMarkup()
-        inline_kb_ria.add(InlineKeyboardButton('Перейти по ссылке', url=f'{check_items["item_url"]}'))
+            inline_kb_ria = InlineKeyboardMarkup()
+            inline_kb_ria.add(InlineKeyboardButton('Перейти по ссылке', url=f'{check_items["item_url"]}'))
+            await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_ria)
 
-        await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_ria)
+        except KeyError:
+            parse_items = f'\n{hbold("Местоположение", ": ")}Неизвестно' \
+                          f'\n{hbold("Наименование", ": ")}Неизвестно' \
+                          f'\n{hbold("Цена", ": ")}Неизвестно'  \
+
+            await message.answer(parse_items, parse_mode="HTML")
+
     await state.finish()
 
 

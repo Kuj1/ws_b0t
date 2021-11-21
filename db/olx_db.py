@@ -31,10 +31,11 @@ async def sql_read_olx_link():
     return cursor.execute("""SELECT * FROM olx_links""")
 
 
-
 async def sql_remove_olx_link():
     olx_db = sqlite3.connect('db_archive/olx_db')
     cursor = olx_db.cursor()
-    cursor.execute("""DELETE FROM olx_links""")
+    if cursor.execute("""DELETE FROM olx_links"""):
+        print('[INFO]: Links deleted from Database')
+    else:
+        print('WARNING: Something goes wrong')
     olx_db.commit()
-    print('[INFO]: Links deleted from Database')

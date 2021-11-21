@@ -34,6 +34,8 @@ async def sql_read_ria_link():
 async def sql_remove_ria_link():
     ria_db = sqlite3.connect('db_archive/ria_db')
     cursor = ria_db.cursor()
-    cursor.execute("""DELETE FROM ria_links""")
+    if cursor.execute("""DELETE FROM ria_links"""):
+        print('[INFO]: Links deleted from Database')
+    else:
+        print('WARNING: Something goes wrong')
     ria_db.commit()
-    print('[INFO]: Links deleted from Database')
