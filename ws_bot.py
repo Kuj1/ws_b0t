@@ -2,13 +2,14 @@ import logging
 from aiogram.utils import executor
 from create_bot import dp
 from handlers import client, common
-from db import olx_db
+from db import olx_db, ria_db
 
 logging.basicConfig(level=logging.INFO)
 
 
 async def startup(_):
-    olx_db.sql_connect()
+    olx_db.sql_connect_olx()
+    ria_db.sql_connect_to_ria()
 
 
 client.register_client_handlers(dp)

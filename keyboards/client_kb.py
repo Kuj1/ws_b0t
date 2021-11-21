@@ -10,7 +10,7 @@ choose_parsers.add(olx_btn).insert(autoria_btn)
 
 create_link_btn = KeyboardButton('Создать ссылку Olx')
 my_links = KeyboardButton('Мои ссылки')
-remove_link = KeyboardButton('Удалить ссылку')
+remove_link = KeyboardButton('Удалить ссылки Olx')
 returned_btn = KeyboardButton('Вернуться к агрегаторам')
 
 kb_client = ReplyKeyboardMarkup(resize_keyboard=True)
@@ -18,7 +18,7 @@ kb_client.add(create_link_btn).add(my_links).insert(remove_link).row(returned_bt
 
 create_link_btn_auto = KeyboardButton('Создать ссылку Auto.ria')
 my_links_auto = KeyboardButton('Мои ссылки')
-remove_link_auto = KeyboardButton('Удалить ссылку')
+remove_link_auto = KeyboardButton('Удалить ссылки Auto.ria')
 returned_btn_auto = KeyboardButton('Вернуться к агрегаторам')
 
 kb_client_auto = ReplyKeyboardMarkup(resize_keyboard=True)

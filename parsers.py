@@ -3,11 +3,6 @@ from random import randint
 import requests
 from bs4 import BeautifulSoup
 
-__all__ = ['olx']
-
-
-URL_1 = 'https://www.olx.ua/transport/'
-URL_2 = 'https://auto.ria.com/newauto/search/'
 HEADERS = [
     {'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) '
      'Chrome/96.0.4664.55 Mobile Safari/537.36',
@@ -22,8 +17,26 @@ HEADERS = [
     ]
 
 
-def olx(url=URL_1, params=None):
-    data = []
+def sql_output_olx_link():
+    url_olx = ''
+    olx_db = sqlite3.connect('db_archive/olx_db')
+    cursor = olx_db.cursor()
+    for link in cursor.execute("""SELECT * FROM olx_links""").fetchall():
+        url_olx = link[0]
+    return url_olx
+
+
+def sql_output_ria_link():
+    url_ria = ''
+    ria_db = sqlite3.connect('db_archive/ria_db')
+    cursor = ria_db.cursor()
+    for link in cursor.execute("""SELECT * FROM ria_links""").fetchall():
+        url_ria = link[0]
+    return url_ria
+
+
+def olx(url='None', params=None):
+    data = {}
     errors = []
     if url:
         r = requests.get(url, headers=HEADERS[randint(0, 2)], params=params)
@@ -35,7 +48,8 @@ def olx(url=URL_1, params=None):
                 for item in item_cards:
                     try:
                         item_photo = item.find('img').get('src')
-                    except:
+                    except TypeError:
+                        # continue
                         item_photo = 'Нет фото'
                     item_city = item.find('td', class_='bottom-cell').find('small', class_='breadcrumb x-normal'). \
                         find('span').text
@@ -43,15 +57,13 @@ def olx(url=URL_1, params=None):
                     item_price = item.find('p', class_='price').text.strip()
                     item_url = item.find('h3', class_='lheight22 margintop5').find('a').get('href')
 
-                    data.append({
+                    data = {
                         'item_photo': item_photo,
                         'item_city': item_city,
                         'item_title': item_title,
                         'item_price': item_price,
                         'item_url': item_url
-                    })
-
-                    data.append((item_photo, item_city, item_title, item_price, item_url))
+                    }
 
             else:
                 errors.append({'url': url, 'title': "Div does not exists"})
@@ -59,22 +71,11 @@ def olx(url=URL_1, params=None):
         else:
             errors.append({'url': url, 'title': "Page do not response"})
 
-    # conn = sqlite3.connect('data/olx.db')
-    #
-    # sql_insert_query = '''INSERT INTO item_olx (item_photo, item_city, item_title, item_price, item_url)
-    #                         VALUES (?, ?, ?, ?, ?)'''
-    #
-    # cursor = conn.cursor()
-    # cursor.executemany(sql_insert_query, data[0])
-    #
-    # conn.commit()
-    # conn.close()
-
-    return data[0], errors
+    return data, errors
 
 
-def auto_ria(url=URL_2):
-    data = []
+def auto_ria(url=None):
+    data = {}
     errors = []
     if url:
         r = requests.get(url, headers=HEADERS[randint(0, 2)], params=None)
@@ -91,13 +92,13 @@ def auto_ria(url=URL_2):
                     item_price = item.find('div', class_='price-ticket').find('span', class_='bold green size22').text
                     item_url = item.find('div', class_='ticket-photo').find('a').get('href')
 
-                    data.append({
+                    data = {
                         'item_photo': item_photo,
                         'item_city': item_city,
                         'item_title': item_title,
                         'item_price': f'{item_price} $',
                         'item_url': item_url
-                    })
+                    }
             elif another_item_desk:
                 another_item_cards = another_item_desk.find_all('section', class_='proposition')
                 for another_item in another_item_cards:
@@ -107,27 +108,27 @@ def auto_ria(url=URL_2):
                     another_item_price = another_item.find('div', class_='proposition_price').find('span').text.strip()
                     another_item_url = another_item.find('a').get('href')
 
-                    data.append({
+                    data = {
                         'item_photo': another_item_photo,
                         'item_city': another_item_city,
                         'item_title': another_item_title,
                         'item_price': {another_item_price},
                         'item_url': f'https://auto.ria.com{another_item_url}'
-                    })
+                    }
             else:
                 errors.append({'url': url, 'title': "Div does not exists"})
 
         else:
             errors.append({'url': url, 'title': "Page do not response"})
 
-    return data[0], errors
+    return data, errors
 
 
 def main():
-    # result_olx = olx(url=URL_1)
-    # print(result_olx)
-    result_autoria = (auto_ria())
-    print(result_autoria)
+    url_for_olx = sql_output_olx_link()
+    result_olx = olx(url=url_for_olx)
+    url_for_ria = sql_output_ria_link()
+    result_ria = auto_ria(url=url_for_ria)
 
 
 if __name__ == '__main__':
