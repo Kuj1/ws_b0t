@@ -35,7 +35,7 @@ def sql_output_ria_link():
     return url_ria
 
 
-def olx(url='None', params=None):
+def olx(url=None, params=None):
     data = {}
     errors = []
     if url:
@@ -123,12 +123,10 @@ def auto_ria(url=None):
     return data, errors
 
 
-def main():
-    url_for_olx = sql_output_olx_link()
-    result_olx = olx(url=url_for_olx)
-    url_for_ria = sql_output_ria_link()
-    result_ria = auto_ria(url=url_for_ria)
 
+# def main():
+#
+#
+# if __name__ == '__main__':
+#     main()
 
-if __name__ == '__main__':
-    main()
