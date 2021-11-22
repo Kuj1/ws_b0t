@@ -106,7 +106,7 @@ async def create_link_olx(message: types.Message, state: FSMContext):
     result_olx = olx(url=url_for_olx)
 
     # Этот срез очень важен, его лучше не убирать иначе TypeError
-    for check_items in result_olx[0: -1]:
+    for check_items in result_olx[0:-1]:
         try:
             parse_items = f'{hide_link(check_items["item_photo"])} ' \
                           f'\n{hbold("Местоположение", ": ")}{check_items["item_city"]}' \
@@ -125,6 +125,7 @@ async def create_link_olx(message: types.Message, state: FSMContext):
 
             await message.answer(parse_items, parse_mode="HTML")
 
+        # await state.finish()
         # time.sleep(60)
 
         await state.finish()

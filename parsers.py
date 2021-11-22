@@ -44,7 +44,7 @@ def olx(url=None, params=None):
             soup = BeautifulSoup(r.content, 'lxml')
             item_desk = soup.find('table', class_='fixed offers breakword redesigned')
             if item_desk:
-                item_cards = item_desk.find_all('div', class_='offer-wrapper')
+                item_cards = reversed(item_desk.find_all('div', class_='offer-wrapper'))
                 for item in item_cards:
                     try:
                         item_photo = item.find('img').get('src')
