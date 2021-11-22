@@ -1,7 +1,7 @@
-import asyncio
+# import asyncio
 import time
-import asyncio
-from create_bot import bot
+# import asyncio
+# from create_bot import bot
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
@@ -100,35 +100,25 @@ async def create_link_olx(message: types.Message, state: FSMContext):
     await sql_add_link(state)
     await message.answer('Ссылка создана')
 
-    # while url:
+    while url:
 
-    url_for_olx = sql_output_olx_link()
-    result_olx = olx(url=url_for_olx)
+        url_for_olx = sql_output_olx_link()
+        result_olx = olx(url=url_for_olx)
 
-    # Этот срез очень важен, его лучше не убирать иначе TypeError
-    for check_items in result_olx[0:-1]:
-        try:
-            parse_items = f'{hide_link(check_items["item_photo"])} ' \
-                          f'\n{hbold("Местоположение", ": ")}{check_items["item_city"]}' \
-                          f'\n{hbold("Наименование", ": ")}{check_items["item_title"]}' \
-                          f'\n{hbold("Цена", ": ")}{check_items["item_price"]}' \
-                          f'\n{hide_link(check_items["item_photo"])}'
+        parse_items = f'{hide_link(result_olx[0])} ' \
+                      f'\n{hbold("Местоположение", ": ")}{result_olx[1]}' \
+                      f'\n{hbold("Наименование", ": ")}{result_olx[2]}' \
+                      f'\n{hbold("Цена", ": ")}{result_olx[3]}' \
+                      f'\n{hide_link(result_olx[0])}'
 
-            inline_kb_olx = InlineKeyboardMarkup()
-            inline_kb_olx.add(InlineKeyboardButton('Перейти по ссылке', url=f'{check_items["item_url"]}'))
-            await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_olx)
+        inline_kb_olx = InlineKeyboardMarkup()
+        inline_kb_olx.add(InlineKeyboardButton('Перейти по ссылке', url=result_olx[4]))
 
-        except KeyError:
-            parse_items = f'\n{hbold("Местоположение", ": ")}Неизвестно' \
-                          f'\n{hbold("Наименование", ": ")}Неизвестно' \
-                          f'\n{hbold("Цена", ": ")}Неизвестно' \
+        await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_olx)
 
-            await message.answer(parse_items, parse_mode="HTML")
+        time.sleep(60)
 
-        # await state.finish()
-        # time.sleep(60)
-
-        await state.finish()
+    await state.finish()
 
 
 async def show_links_olx(message: types.Message):
@@ -175,31 +165,23 @@ async def create_link_autoria(message: types.Message, state: FSMContext):
     await sql_add_link_to_ria(state)
     await message.answer('Ссылка создана')
 
-    # while url:
+    while url:
 
-    url_for_ria = sql_output_ria_link()
-    result_ria = auto_ria(url=url_for_ria)
+        url_for_ria = sql_output_ria_link()
+        result_ria = auto_ria(url=url_for_ria)
 
-    for check_items in result_ria[0: -1]:
-        try:
-            parse_items = f'{hide_link(check_items["item_photo"])} ' \
-                          f'\n{hbold("Местоположение", ": ")}{check_items["item_city"]}' \
-                          f'\n{hbold("Наименование", ": ")}{check_items["item_title"]}' \
-                          f'\n{hbold("Цена", ": ")}{check_items["item_price"]}' \
-                          f'\n{hide_link(check_items["item_photo"])}'
+        parse_items = f'{hide_link(result_ria[0])} ' \
+                      f'\n{hbold("Местоположение", ": ")}{result_ria[1]}' \
+                      f'\n{hbold("Наименование", ": ")}{result_ria[2]}' \
+                      f'\n{hbold("Цена", ": ")}{result_ria[3]}' \
+                      f'\n{hide_link(result_ria[0])}'
 
-            inline_kb_ria = InlineKeyboardMarkup()
-            inline_kb_ria.add(InlineKeyboardButton('Перейти по ссылке', url=f'{check_items["item_url"]}'))
-            await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_ria)
+        inline_kb_ria = InlineKeyboardMarkup()
+        inline_kb_ria.add(InlineKeyboardButton('Перейти по ссылке', url=result_ria[4]))
 
-        except KeyError:
-            parse_items = f'\n{hbold("Местоположение", ": ")}Неизвестно' \
-                          f'\n{hbold("Наименование", ": ")}Неизвестно' \
-                          f'\n{hbold("Цена", ": ")}Неизвестно'  \
+        await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_ria)
 
-            await message.answer(parse_items, parse_mode="HTML")
-
-        # time.sleep(60)
+        time.sleep(60)
 
     await state.finish()
 
