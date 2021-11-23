@@ -11,7 +11,7 @@ def sql_connect_olx():
     cursor = olx_db.cursor()
     if olx_db:
         print('[INFO]: Database is connected')
-    olx_db.execute("""CREATE TABLE IF NOT EXISTS olx_links (link TEXT UNIQUE)""")
+    olx_db.execute("""CREATE TABLE IF NOT EXISTS olx_links (link TEXT, CONSTRAINT uc UNIQUE (link))""")
     olx_db.commit()
 
 

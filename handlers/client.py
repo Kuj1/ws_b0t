@@ -102,10 +102,10 @@ https://youtu.be/uxImf35UNUE
 
 # После этой функции начинается парсинг и показ результата /message.text == Text(equals='Вернуться к агрегаторам')/
 async def create_link_olx(message: types.Message, state: FSMContext):
+    async with state.proxy() as url:
+        url['url_olx'] = message.text
+    await sql_add_link(state)
     while run:
-        async with state.proxy() as url:
-            url['url_olx'] = message.text
-        await sql_add_link(state)
         await message.answer('Карточка продукта загружается...')
         await asyncio.sleep(5)
 
@@ -124,6 +124,7 @@ async def create_link_olx(message: types.Message, state: FSMContext):
         await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_olx)
 
         if not run:
+            # await asyncio.sleep(0)
             await state.finish()
             print('[INFO]: State "FsmCreateLinkOlx" is finished')
 
@@ -168,11 +169,10 @@ https://youtu.be/uxImf35UNUE
 
 
 async def create_link_autoria(message: types.Message, state: FSMContext):
+    async with state.proxy() as url:
+        url['url_autoria'] = message.text
+    await sql_add_link_to_ria(state)
     while run:
-        async with state.proxy() as url:
-            url['url_autoria'] = message.text
-
-        await sql_add_link_to_ria(state)
         await message.answer('Карточка продукта загружается...')
         await asyncio.sleep(5)
 
