@@ -1,6 +1,4 @@
-# import asyncio
-import time
-# import asyncio
+import asyncio
 # from create_bot import bot
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
@@ -16,14 +14,15 @@ from keyboards import kb_client_auto
 from keyboards import choose_parsers
 from parsers import sql_output_olx_link, olx, sql_output_ria_link, auto_ria
 
+run = True
+
+
+class FsmCreateLinkOlx(StatesGroup):
+    create = State()
 
 
 class FsmCreateLinkAuto(StatesGroup):
     create_auto = State()
-
-
-class FsmCreateLink(StatesGroup):
-    create = State()
 
 
 class FsmRemoveLink(StatesGroup):
@@ -32,6 +31,11 @@ class FsmRemoveLink(StatesGroup):
 
 class FsmMyLinks(StatesGroup):
     show_links = State()
+
+
+class FsmCancel(StatesGroup):
+    cancel = State()
+
 
 
 async def command_start(message: types.Message):
@@ -58,6 +62,8 @@ https://youtu.be/8tOxQjOZ0Kg""", reply_markup=choose_parsers,)
 
 
 async def cancel_btn(message: types.Message, state: FSMContext):
+    global run
+    run = False
     # Думаю на данном этапе здесь эта логика не нужна, но на всякий
     # current_state = await state.get_state()
     # if current_state is None:
@@ -72,7 +78,7 @@ async def start_olx(message: types.Message):
 
 async def start_create_link_olx(message: types.Message):
     await message.reply('Введите ссылку:')
-    await FsmCreateLink.create.set()
+    await FsmCreateLinkOlx.create.set()
 
 
 # если ссылка не валидна
@@ -92,15 +98,13 @@ https://youtu.be/uxImf35UNUE
 🔑🔑🔑Что бы добавить дополнительную ссылку напишите администратору @Brookland✍🏻✍🏻✍🏻""")
 
 
-# После этой функции начинается парсинг и показ результата
+# После этой функции начинается парсинг и показ результата /message.text == Text(equals='Вернуться к агрегаторам')/
 async def create_link_olx(message: types.Message, state: FSMContext):
-    async with state.proxy() as url:
-        url['url_olx'] = message.text
-
-    await sql_add_link(state)
-    await message.answer('Ссылка создана')
-
-    while url:
+    while run:
+        async with state.proxy() as url:
+            url['url_olx'] = message.text
+        await sql_add_link(state)
+        await message.answer('Карточка продукта загружается...')
 
         url_for_olx = sql_output_olx_link()
         result_olx = olx(url=url_for_olx)
@@ -115,10 +119,11 @@ async def create_link_olx(message: types.Message, state: FSMContext):
         inline_kb_olx.add(InlineKeyboardButton('Перейти по ссылке', url=result_olx[4]))
 
         await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_olx)
+        await asyncio.sleep(20)
 
-        time.sleep(60)
-
-    await state.finish()
+        if not run:
+            await state.finish()
+            print('[INFO]: State "FsmCreateLinkOlx" is finished')
 
 
 async def show_links_olx(message: types.Message):
@@ -159,13 +164,12 @@ https://youtu.be/uxImf35UNUE
 
 
 async def create_link_autoria(message: types.Message, state: FSMContext):
-    async with state.proxy() as url:
-        url['url_autoria'] = message.text
+    while run:
+        async with state.proxy() as url:
+            url['url_autoria'] = message.text
 
-    await sql_add_link_to_ria(state)
-    await message.answer('Ссылка создана')
-
-    while url:
+        await sql_add_link_to_ria(state)
+        await message.answer('Ссылка создана')
 
         url_for_ria = sql_output_ria_link()
         result_ria = auto_ria(url=url_for_ria)
@@ -180,10 +184,11 @@ async def create_link_autoria(message: types.Message, state: FSMContext):
         inline_kb_ria.add(InlineKeyboardButton('Перейти по ссылке', url=result_ria[4]))
 
         await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_ria)
+        await asyncio.sleep(5)
 
-        time.sleep(60)
-
-    await state.finish()
+        if not run:
+            await state.finish()
+            print('[INFO]: State "FsmCreateLinkAuto" is finished')
 
 
 async def show_links_autoria(message: types.Message, state: FSMContext):
@@ -203,8 +208,8 @@ def register_client_handlers(dp: Dispatcher):
     dp.register_message_handler(start_olx, Text('Olx'), content_types=['text'])
     dp.register_message_handler(start_create_link_olx, Text('Создать ссылку Olx'), state=None)
     dp.register_message_handler(link_invalid_olx, lambda message: 'https://www.olx.ua/' not in message.text,
-                                state=FsmCreateLink.create)
-    dp.register_message_handler(create_link_olx, content_types=['text'], state=FsmCreateLink.create)
+                                state=FsmCreateLinkOlx.create)
+    dp.register_message_handler(create_link_olx, content_types=['text'], state=FsmCreateLinkOlx.create)
     dp.register_message_handler(show_links_olx, Text('Мои ссылки'))
     dp.callback_query_handler(lambda x: x.data and x.data.startwith('del '))
     dp.register_message_handler(removing_link_olx, Text('Удалить ссылки Olx'))
