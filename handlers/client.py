@@ -214,7 +214,7 @@ def register_client_handlers(dp: Dispatcher):
     dp.register_message_handler(link_invalid_olx, lambda message: 'https://www.olx.ua/' not in message.text,
                                 state=FsmCreateLinkOlx.create)
     dp.register_message_handler(create_link_olx, content_types=['text'], state=FsmCreateLinkOlx.create)
-    dp.register_message_handler(show_links_olx, Text('Мои ссылки с Olx'))
+    dp.register_message_handler(show_links_olx, Text(equals='Мои ссылки'))
     # dp.callback_query_handler(lambda x: x.data and x.data.startwith('del '))
     dp.register_message_handler(removing_link_olx, Text('Удалить ссылки Olx'))
     dp.register_message_handler(start_autoria, Text('Auto.ria'), content_types=['text'])
@@ -222,5 +222,5 @@ def register_client_handlers(dp: Dispatcher):
     dp.register_message_handler(link_invalid_autoria, lambda message: 'https://auto.ria.com/' not in message.text,
                                 state=FsmCreateLinkAuto.create_auto)
     dp.register_message_handler(create_link_autoria, content_types=['text'], state=FsmCreateLinkAuto.create_auto)
-    dp.register_message_handler(show_links_autoria, Text('Мои ссылки с Auto.ria'))
+    dp.register_message_handler(show_links_autoria, Text(equals='Мои ссылки с Auto.ria'))
     dp.register_message_handler(removing_link_ria, Text('Удалить ссылки Auto.ria'))

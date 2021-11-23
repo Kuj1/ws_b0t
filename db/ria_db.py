@@ -11,7 +11,7 @@ def sql_connect_to_ria():
     cursor = ria_db.cursor()
     if ria_db:
         print('[INFO]: Database is connected')
-    ria_db.execute("""CREATE TABLE IF NOT EXISTS ria_links(link TEXT)""")
+    ria_db.execute("""CREATE TABLE IF NOT EXISTS ria_links(link TEXT UNIQUE)""")
     ria_db.commit()
 
 
@@ -20,7 +20,7 @@ async def sql_add_link_to_ria(state):
     cursor = ria_db.cursor()
 
     async with state.proxy() as url:
-        cursor.execute("""INSERT INTO ria_links VALUES(?)""", tuple(url.values()))
+        cursor.execute("""INSERT OR IGNORE INTO ria_links VALUES(?)""", tuple(url.values()))
         ria_db.commit()
 
 
@@ -28,7 +28,7 @@ async def sql_read_ria_link():
     ria_db = sqlite3.connect('db_archive/ria_db')
     cursor = ria_db.cursor()
 
-    return cursor.execute("""SELECT * FROM ria_links""")
+    return cursor.execute("""SELECT * FROM ria_links""").fetchall()
 
 
 async def sql_remove_ria_link():

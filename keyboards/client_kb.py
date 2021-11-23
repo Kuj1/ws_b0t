@@ -9,7 +9,7 @@ choose_parsers.add(olx_btn).insert(autoria_btn)
 
 
 create_link_btn = KeyboardButton('Создать ссылку Olx')
-my_links = KeyboardButton('Мои ссылки c Olx')
+my_links = KeyboardButton('Мои ссылки')
 remove_link = KeyboardButton('Удалить ссылки Olx')
 returned_btn = KeyboardButton('Вернуться к агрегаторам')
 

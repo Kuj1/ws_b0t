@@ -11,7 +11,7 @@ def sql_connect_olx():
     cursor = olx_db.cursor()
     if olx_db:
         print('[INFO]: Database is connected')
-    olx_db.execute("""CREATE TABLE IF NOT EXISTS olx_links(link TEXT)""")
+    olx_db.execute("""CREATE TABLE IF NOT EXISTS olx_links (link TEXT UNIQUE)""")
     olx_db.commit()
 
 
@@ -20,15 +20,14 @@ async def sql_add_link(state):
     cursor = olx_db.cursor()
 
     async with state.proxy() as url:
-        cursor.execute("""INSERT INTO olx_links VALUES(?)""", tuple(url.values()))
+        cursor.execute("""INSERT OR IGNORE INTO olx_links VALUES(?)""", tuple(url.values()))
         olx_db.commit()
 
 
 async def sql_read_olx_link():
     olx_db = sqlite3.connect('db_archive/olx_db')
     cursor = olx_db.cursor()
-
-    return cursor.execute("""SELECT * FROM olx_links""")
+    return cursor.execute("""SELECT * FROM olx_links""").fetchall()
 
 
 async def sql_remove_olx_link():
