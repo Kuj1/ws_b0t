@@ -104,7 +104,7 @@ def auto_ria(url):
 
 def main():
     olx_url = sql_output_olx_link()
-    result = olx(olx_url)
+    ria_url = sql_output_ria_link()
 
 
 if __name__ == '__main__':

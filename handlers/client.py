@@ -73,6 +73,8 @@ async def cancel_btn(message: types.Message, state: FSMContext):
 
 
 async def start_olx(message: types.Message):
+    global run
+    run = True
     await message.answer('Выберите опцию', reply_markup=kb_client)
 
 
@@ -105,6 +107,7 @@ async def create_link_olx(message: types.Message, state: FSMContext):
             url['url_olx'] = message.text
         await sql_add_link(state)
         await message.answer('Карточка продукта загружается...')
+        await asyncio.sleep(5)
 
         url_for_olx = sql_output_olx_link()
         result_olx = olx(url=url_for_olx)
@@ -119,7 +122,6 @@ async def create_link_olx(message: types.Message, state: FSMContext):
         inline_kb_olx.add(InlineKeyboardButton('Перейти по ссылке', url=result_olx[4]))
 
         await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_olx)
-        await asyncio.sleep(20)
 
         if not run:
             await state.finish()
@@ -138,6 +140,8 @@ async def removing_link_olx(message: types.Message):
 
 
 async def start_autoria(message: types.Message):
+    global run
+    run = True
     await message.answer('Выберите опцию', reply_markup=kb_client_auto)
 
 
@@ -169,7 +173,8 @@ async def create_link_autoria(message: types.Message, state: FSMContext):
             url['url_autoria'] = message.text
 
         await sql_add_link_to_ria(state)
-        await message.answer('Ссылка создана')
+        await message.answer('Карточка продукта загружается...')
+        await asyncio.sleep(5)
 
         url_for_ria = sql_output_ria_link()
         result_ria = auto_ria(url=url_for_ria)
@@ -184,7 +189,6 @@ async def create_link_autoria(message: types.Message, state: FSMContext):
         inline_kb_ria.add(InlineKeyboardButton('Перейти по ссылке', url=result_ria[4]))
 
         await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_ria)
-        await asyncio.sleep(5)
 
         if not run:
             await state.finish()
@@ -210,13 +214,13 @@ def register_client_handlers(dp: Dispatcher):
     dp.register_message_handler(link_invalid_olx, lambda message: 'https://www.olx.ua/' not in message.text,
                                 state=FsmCreateLinkOlx.create)
     dp.register_message_handler(create_link_olx, content_types=['text'], state=FsmCreateLinkOlx.create)
-    dp.register_message_handler(show_links_olx, Text('Мои ссылки'))
-    dp.callback_query_handler(lambda x: x.data and x.data.startwith('del '))
+    dp.register_message_handler(show_links_olx, Text('Мои ссылки с Olx'))
+    # dp.callback_query_handler(lambda x: x.data and x.data.startwith('del '))
     dp.register_message_handler(removing_link_olx, Text('Удалить ссылки Olx'))
     dp.register_message_handler(start_autoria, Text('Auto.ria'), content_types=['text'])
     dp.register_message_handler(start_create_link_autoria, Text('Создать ссылку Auto.ria'), state=None)
     dp.register_message_handler(link_invalid_autoria, lambda message: 'https://auto.ria.com/' not in message.text,
                                 state=FsmCreateLinkAuto.create_auto)
     dp.register_message_handler(create_link_autoria, content_types=['text'], state=FsmCreateLinkAuto.create_auto)
-    dp.register_message_handler(show_links_autoria, Text('Мои ссылки'), state=FsmMyLinks.show_links)
+    dp.register_message_handler(show_links_autoria, Text('Мои ссылки с Auto.ria'))
     dp.register_message_handler(removing_link_ria, Text('Удалить ссылки Auto.ria'))
