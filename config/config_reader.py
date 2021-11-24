@@ -20,6 +20,6 @@ def load_config(path: str):
 
     return Config(
         ws_bot=WsBot(
-            token=ws_bot["token"]
+            token=ws_bot['token']
         )
     )

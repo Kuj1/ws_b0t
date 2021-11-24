@@ -1,6 +1,5 @@
 import asyncio
 import sqlite3
-# from create_bot import bot
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
@@ -109,21 +108,29 @@ async def create_link_olx(message: types.Message, state: FSMContext):
 
     while run:
 
+        data_res = []
         url_for_olx = sql_output_olx_link()
         result_olx = olx(url=url_for_olx)
+# Собственно фильтр без бд
+        while result_olx:
+            if result_olx in data_res:
+                await asyncio.sleep(100)
+                url_for_olx = sql_output_olx_link()
+                result_olx = olx(url=url_for_olx)
+                continue
+            elif result_olx not in data_res:
+                data_res.append(result_olx)
+                print(data_res)
+                parse_items = f'{hide_link(result_olx[1])} ' \
+                              f'\n{hbold("Местоположение", ": ")}{result_olx[2]}' \
+                              f'\n{hbold("Наименование", ": ")}{result_olx[3]}' \
+                              f'\n{hbold("Цена", ": ")}{result_olx[4]}' \
+                              f'\n{hide_link(result_olx[1])}'
 
-        parse_items = f'{hide_link(result_olx[1])} ' \
-                      f'\n{hbold("Местоположение", ": ")}{result_olx[2]}' \
-                      f'\n{hbold("Наименование", ": ")}{result_olx[3]}' \
-                      f'\n{hbold("Цена", ": ")}{result_olx[4]}' \
-                      f'\n{hide_link(result_olx[1])}'
+                inline_kb_olx = InlineKeyboardMarkup()
+                inline_kb_olx.add(InlineKeyboardButton('Перейти по ссылке', url=result_olx[5]))
 
-        inline_kb_olx = InlineKeyboardMarkup()
-        inline_kb_olx.add(InlineKeyboardButton('Перейти по ссылке', url=result_olx[5]))
-
-        await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_olx)
-
-        await asyncio.sleep(330)
+                await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_olx)
 
         if not run:
             await state.finish()
@@ -177,21 +184,29 @@ async def create_link_autoria(message: types.Message, state: FSMContext):
 
     while run:
 
+        data_res_ria = []
         url_for_ria = sql_output_ria_link()
         result_ria = auto_ria(url=url_for_ria)
+# Собственно фильтр без бд
+        while result_ria:
+            if result_ria in data_res_ria:
+                await asyncio.sleep(100)
+                url_for_ria = sql_output_ria_link()
+                result_ria = auto_ria(url=url_for_ria)
+                continue
+            elif result_ria not in data_res_ria:
+                data_res_ria.append(result_ria)
 
-        parse_items = f'{hide_link(result_ria[0])} ' \
-                      f'\n{hbold("Местоположение", ": ")}{result_ria[1]}' \
-                      f'\n{hbold("Наименование", ": ")}{result_ria[2]}' \
-                      f'\n{hbold("Цена", ": ")}{result_ria[3]}' \
-                      f'\n{hide_link(result_ria[0])}'
+                parse_items = f'{hide_link(result_ria[1])} ' \
+                              f'\n{hbold("Местоположение", ": ")}{result_ria[2]}' \
+                              f'\n{hbold("Наименование", ": ")}{result_ria[3]}' \
+                              f'\n{hbold("Цена", ": ")}{result_ria[4]}' \
+                              f'\n{hide_link(result_ria[1])}'
 
-        inline_kb_ria = InlineKeyboardMarkup()
-        inline_kb_ria.add(InlineKeyboardButton('Перейти по ссылке', url=result_ria[4]))
+                inline_kb_ria = InlineKeyboardMarkup()
+                inline_kb_ria.add(InlineKeyboardButton('Перейти по ссылке', url=result_ria[5]))
 
-        await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_ria)
-
-        await asyncio.sleep(330)
+                await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_ria)
 
         if not run:
             await state.finish()

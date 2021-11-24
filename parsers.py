@@ -1,8 +1,4 @@
 import sqlite3
-import os
-import asyncio
-import json
-import time
 
 import requests
 from bs4 import BeautifulSoup
@@ -71,6 +67,7 @@ def olx(url):
 
         data.append((item_id, item_photo, item_city, item_title, item_price, item_url))
 
+
     return data[5]
 
 
@@ -86,31 +83,33 @@ def auto_ria(url):
     if item_desk:
         item_cards = item_desk.find_all('section', class_='ticket-item')
         for item in item_cards:
+            item_id = item.find('div', class_='hide').get('data-id')
             item_photo = item.find('picture').find('img').get('src')
             item_city = item.find('li', class_='view-location').text.replace('( от )', '').strip()
             item_title = item.find('div', class_='item ticket-title').find('a').text.strip()
             item_price = item.find('div', class_='price-ticket').find('span', class_='bold green size22').text
             item_url = item.find('div', class_='ticket-photo').find('a').get('href')
 
-            data.append((item_photo, item_city, item_title, item_price, item_url))
+            data.append((item_id, item_photo, item_city, item_title, item_price, item_url))
 
     elif another_item_desk:
         another_item_cards = another_item_desk.find_all('section', class_='proposition')
         for another_item in another_item_cards:
+            another_item_id = another_item.find('a').get('href').replace('/newauto/auto-kia-sportage-', '').replace('.html', '')
             another_item_photo = another_item.find('picture').find('img').get('src')
             another_item_city = another_item.find('span', class_='item region').text.strip()
             another_item_title = another_item.find('h3', class_='proposition_name').find('span').text.strip()
             another_item_price = another_item.find('div', class_='proposition_price').find('span').text.strip()
-            another_item_url = another_item.find('a').get('href')
+            another_item_url =f"https://auto.ria.com{another_item.find('a').get('href')}"
 
-            data.append((another_item_photo, another_item_city, another_item_title, another_item_price, another_item_url))
+            data.append((another_item_id, another_item_photo, another_item_city, another_item_title, another_item_price, another_item_url))
 
     return data[0]
 
 
 def main():
     olx_url = sql_output_olx_link()
-    # res = olx('https://www.olx.ua/nedvizhimost/')
+    # res = auto_ria('https://auto.ria.com/search/?categories.main.id=1&indexName=auto&size=10')
     # print(res)
     ria_url = sql_output_ria_link()
 
