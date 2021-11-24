@@ -1,4 +1,9 @@
 import sqlite3
+import os
+import asyncio
+import json
+import time
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -37,14 +42,15 @@ def olx(url):
     item_cards = soup.find_all('div', class_='offer-wrapper')
 
     for item in item_cards:
+        item_id = item.find('table').get('data-id')
         try:
             item_photo = item.find('td', class_='photo-cell').find('img').get('src')
         except AttributeError:
             item_photo = 'Нет фото'
 
         try:
-            item_city = item.find('td', class_='bottom-cell').find('small', class_='breadcrumb x-normal').\
-            find('span').text
+            item_city = item.find('td', class_='bottom-cell').find('small', class_='breadcrumb x-normal'). \
+                find('span').text
         except AttributeError:
             item_city = 'Нет местоположения'
 
@@ -63,7 +69,7 @@ def olx(url):
         except AttributeError:
             item_url = 'Нет ссылки'
 
-        data.append((item_photo, item_city, item_title, item_price, item_url))
+        data.append((item_id, item_photo, item_city, item_title, item_price, item_url))
 
     return data[5]
 
@@ -104,6 +110,8 @@ def auto_ria(url):
 
 def main():
     olx_url = sql_output_olx_link()
+    # res = olx('https://www.olx.ua/nedvizhimost/')
+    # print(res)
     ria_url = sql_output_ria_link()
 
 

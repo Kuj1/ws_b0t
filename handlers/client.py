@@ -1,4 +1,5 @@
 import asyncio
+import sqlite3
 # from create_bot import bot
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
@@ -15,7 +16,6 @@ from keyboards import choose_parsers
 from parsers import sql_output_olx_link, olx, sql_output_ria_link, auto_ria
 
 run = True
-
 
 class FsmCreateLinkOlx(StatesGroup):
     create = State()
@@ -100,31 +100,32 @@ https://youtu.be/uxImf35UNUE
 🔑🔑🔑Что бы добавить дополнительную ссылку напишите администратору @Brookland✍🏻✍🏻✍🏻""")
 
 
-# После этой функции начинается парсинг и показ результата /message.text == Text(equals='Вернуться к агрегаторам')/
+# После этой функции начинается парсинг и показ результата
 async def create_link_olx(message: types.Message, state: FSMContext):
     async with state.proxy() as url:
         url['url_olx'] = message.text
     await sql_add_link(state)
+    await message.answer('Карточки продуктов загружаются...')
+
     while run:
-        await message.answer('Карточка продукта загружается...')
-        await asyncio.sleep(5)
 
         url_for_olx = sql_output_olx_link()
         result_olx = olx(url=url_for_olx)
 
-        parse_items = f'{hide_link(result_olx[0])} ' \
-                      f'\n{hbold("Местоположение", ": ")}{result_olx[1]}' \
-                      f'\n{hbold("Наименование", ": ")}{result_olx[2]}' \
-                      f'\n{hbold("Цена", ": ")}{result_olx[3]}' \
-                      f'\n{hide_link(result_olx[0])}'
+        parse_items = f'{hide_link(result_olx[1])} ' \
+                      f'\n{hbold("Местоположение", ": ")}{result_olx[2]}' \
+                      f'\n{hbold("Наименование", ": ")}{result_olx[3]}' \
+                      f'\n{hbold("Цена", ": ")}{result_olx[4]}' \
+                      f'\n{hide_link(result_olx[1])}'
 
         inline_kb_olx = InlineKeyboardMarkup()
-        inline_kb_olx.add(InlineKeyboardButton('Перейти по ссылке', url=result_olx[4]))
+        inline_kb_olx.add(InlineKeyboardButton('Перейти по ссылке', url=result_olx[5]))
 
         await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_olx)
 
+        await asyncio.sleep(330)
+
         if not run:
-            # await asyncio.sleep(0)
             await state.finish()
             print('[INFO]: State "FsmCreateLinkOlx" is finished')
 
@@ -172,9 +173,9 @@ async def create_link_autoria(message: types.Message, state: FSMContext):
     async with state.proxy() as url:
         url['url_autoria'] = message.text
     await sql_add_link_to_ria(state)
+    await message.answer('Карточка продукта загружается...')
+
     while run:
-        await message.answer('Карточка продукта загружается...')
-        await asyncio.sleep(5)
 
         url_for_ria = sql_output_ria_link()
         result_ria = auto_ria(url=url_for_ria)
@@ -189,6 +190,8 @@ async def create_link_autoria(message: types.Message, state: FSMContext):
         inline_kb_ria.add(InlineKeyboardButton('Перейти по ссылке', url=result_ria[4]))
 
         await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_ria)
+
+        await asyncio.sleep(330)
 
         if not run:
             await state.finish()
