@@ -10,7 +10,9 @@ logging.basicConfig(level=logging.INFO)
 
 async def startup(_):
     olx_db.sql_connect_olx()
+    olx_db.sql_item_cards()
     ria_db.sql_connect_to_ria()
+    ria_db.sql_item_cards()
 
 
 client.register_client_handlers(dp)
@@ -23,5 +25,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-

@@ -16,6 +16,7 @@ from parsers import sql_output_olx_link, olx, sql_output_ria_link, auto_ria
 
 run = True
 
+
 class FsmCreateLinkOlx(StatesGroup):
     create = State()
 
@@ -36,7 +37,6 @@ class FsmCancel(StatesGroup):
     cancel = State()
 
 
-
 async def command_start(message: types.Message):
     await message.answer("""
 1.Найдите интересующий вас товар на сайте OLX.UA 💎📷💍🚗, по выгодной вам цене💵 
@@ -46,7 +46,7 @@ async def command_start(message: types.Message):
 🚨Внимание🚨
 Для наиболее качественного результата ИСПОЛЬЗУЙТЕ 
      📍полную версию📍сайта OLX  в браузере 🚨Chrome🚨
-Пример ссылки : [ https://www.olx.ua/uk/nedvizhimost/kvartiry-komnaty/prodazha-kvartir-komnat/ko/?search%5Bfilter_float_price%3Ato%5D=3000000 ]
+Пример ссылки : [ https://www.olx.ua/uk/nedvizhimost/kvartiry-komnaty/prodazha-kvartir-komnat/ko/?search ]
 🚨Смотреть ВИДЕО ИНСТРУКЦИЮ
 3.Скопируйте ссылку интересующего вас фильтра в бота 💾 💾💾
 4. Как только объявление по вашим критериям появится на сайте OLX.ua - вы получите уведомление первым!👍🏻 💵💶💷
@@ -63,10 +63,7 @@ https://youtu.be/8tOxQjOZ0Kg""", reply_markup=choose_parsers,)
 async def cancel_btn(message: types.Message, state: FSMContext):
     global run
     run = False
-    # Думаю на данном этапе здесь эта логика не нужна, но на всякий
-    # current_state = await state.get_state()
-    # if current_state is None:
-    #     return
+
     await state.reset_state()
     await message.reply('Вернулись к выбору агрегатора', reply_markup=choose_parsers)
 
@@ -82,7 +79,6 @@ async def start_create_link_olx(message: types.Message):
     await FsmCreateLinkOlx.create.set()
 
 
-# если ссылка не валидна
 async def link_invalid_olx(message: types.Message):
     await message.answer("""🚨Внимание смотреть видео инструкцию для IPhone 🚨https://youtu.be/8tOxQjOZ0Kg
 🚨Внимание смотреть ВИДЕО ИНСТРУКЦИЮ для Android 🚨
@@ -93,34 +89,37 @@ https://youtu.be/uxImf35UNUE
 🚨Внимание🚨
 Для наиболее качественного результата ИСПОЛЬЗУЙТЕ 
      📍полную версию📍сайта OLX  в браузере 🚨Chrome🚨
-Пример ссылки : [ https://www.olx.ua/uk/nedvizhimost/kvartiry-komnaty/prodazha-kvartir-komnat/ko/?search%5Bfilter_float_price%3Ato%5D=3000000 ]
+Пример ссылки : [ https://www.olx.ua/uk/nedvizhimost/kvartiry-komnaty/prodazha-kvartir-komnat/ko/?search ]
 2.Скопируйте ссылку с сайта OLX.ua 💾💾💾
 3.Вставьте ссылку сюда ⬇️⬇️⬇️
 🔑🔑🔑Что бы добавить дополнительную ссылку напишите администратору @Brookland✍🏻✍🏻✍🏻""")
 
 
-# После этой функции начинается парсинг и показ результата
 async def create_link_olx(message: types.Message, state: FSMContext):
+    global run
     async with state.proxy() as url:
         url['url_olx'] = message.text
     await sql_add_link(state)
-    await message.answer('Карточки продуктов загружаются...')
+    data_res = []
+    # tmp = json.dumps(data_res)
 
     while run:
 
-        data_res = []
-        url_for_olx = sql_output_olx_link()
-        result_olx = olx(url=url_for_olx)
-# Собственно фильтр без бд
-        while result_olx:
+        if not run:
+            await state.finish()
+            await cancel_btn(message, state)
+            break
+        else:
+
+            url_for_olx = sql_output_olx_link()
+            result_olx = olx(url=url_for_olx)
+
             if result_olx in data_res:
-                await asyncio.sleep(100)
                 url_for_olx = sql_output_olx_link()
                 result_olx = olx(url=url_for_olx)
-                continue
-            elif result_olx not in data_res:
+
+            if result_olx not in data_res:
                 data_res.append(result_olx)
-                print(data_res)
                 parse_items = f'{hide_link(result_olx[1])} ' \
                               f'\n{hbold("Местоположение", ": ")}{result_olx[2]}' \
                               f'\n{hbold("Наименование", ": ")}{result_olx[3]}' \
@@ -131,10 +130,7 @@ async def create_link_olx(message: types.Message, state: FSMContext):
                 inline_kb_olx.add(InlineKeyboardButton('Перейти по ссылке', url=result_olx[5]))
 
                 await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_olx)
-
-        if not run:
-            await state.finish()
-            print('[INFO]: State "FsmCreateLinkOlx" is finished')
+        await asyncio.sleep(1)
 
 
 async def show_links_olx(message: types.Message):
@@ -159,7 +155,6 @@ async def start_create_link_autoria(message: types.Message):
     await FsmCreateLinkAuto.create_auto.set()
 
 
-# если ссылка не валидна
 async def link_invalid_autoria(message: types.Message):
     await message.answer("""🚨Внимание смотреть видео инструкцию для IPhone 🚨https://youtu.be/8tOxQjOZ0Kg
 🚨Внимание смотреть ВИДЕО ИНСТРУКЦИЮ для Android 🚨
@@ -170,31 +165,36 @@ https://youtu.be/uxImf35UNUE
 🚨Внимание🚨
 Для наиболее качественного результата ИСПОЛЬЗУЙТЕ 
      📍полную версию📍сайта OLX  в браузере 🚨Chrome🚨
-Пример ссылки : [ https://www.olx.ua/uk/nedvizhimost/kvartiry-komnaty/prodazha-kvartir-komnat/ko/?search%5Bfilter_float_price%3Ato%5D=3000000 ]
+Пример ссылки : 
+[ https://www.olx.ua/uk/nedvizhimost/kvartiry-komnaty/prodazha-kvartir-komnat/ko/?search ]
 2.Скопируйте ссылку с сайта OLX.ua 💾💾💾
 3.Вставьте ссылку сюда ⬇️⬇️⬇️
 🔑🔑🔑Что бы добавить дополнительную ссылку напишите администратору @Brookland✍🏻✍🏻✍🏻""")
 
 
 async def create_link_autoria(message: types.Message, state: FSMContext):
+    global run
     async with state.proxy() as url:
         url['url_autoria'] = message.text
     await sql_add_link_to_ria(state)
-    await message.answer('Карточка продукта загружается...')
+    data_res_ria = []
 
     while run:
 
-        data_res_ria = []
-        url_for_ria = sql_output_ria_link()
-        result_ria = auto_ria(url=url_for_ria)
-# Собственно фильтр без бд
-        while result_ria:
+        if not run:
+            await state.finish()
+            await cancel_btn(message, state)
+            break
+        else:
+
+            url_for_ria = sql_output_ria_link()
+            result_ria = auto_ria(url=url_for_ria)
+
             if result_ria in data_res_ria:
-                await asyncio.sleep(100)
                 url_for_ria = sql_output_ria_link()
                 result_ria = auto_ria(url=url_for_ria)
-                continue
-            elif result_ria not in data_res_ria:
+
+            if result_ria not in data_res_ria:
                 data_res_ria.append(result_ria)
 
                 parse_items = f'{hide_link(result_ria[1])} ' \
@@ -207,10 +207,7 @@ async def create_link_autoria(message: types.Message, state: FSMContext):
                 inline_kb_ria.add(InlineKeyboardButton('Перейти по ссылке', url=result_ria[5]))
 
                 await message.answer(parse_items, parse_mode="HTML", reply_markup=inline_kb_ria)
-
-        if not run:
-            await state.finish()
-            print('[INFO]: State "FsmCreateLinkAuto" is finished')
+        await asyncio.sleep(1)
 
 
 async def show_links_autoria(message: types.Message, state: FSMContext):
@@ -233,7 +230,6 @@ def register_client_handlers(dp: Dispatcher):
                                 state=FsmCreateLinkOlx.create)
     dp.register_message_handler(create_link_olx, content_types=['text'], state=FsmCreateLinkOlx.create)
     dp.register_message_handler(show_links_olx, Text(equals='Мои ссылки'))
-    # dp.callback_query_handler(lambda x: x.data and x.data.startwith('del '))
     dp.register_message_handler(removing_link_olx, Text('Удалить ссылки Olx'))
     dp.register_message_handler(start_autoria, Text('Auto.ria'), content_types=['text'])
     dp.register_message_handler(start_create_link_autoria, Text('Создать ссылку Auto.ria'), state=None)

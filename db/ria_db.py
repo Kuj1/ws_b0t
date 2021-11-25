@@ -39,3 +39,18 @@ async def sql_remove_ria_link():
     else:
         print('WARNING: Something goes wrong')
     ria_db.commit()
+
+
+def sql_item_cards():
+    olx_db = sqlite3.connect('db_archive/ria_item_cards_db')
+    cursor = olx_db.cursor()
+    cursor.execute("""CREATE TABLE IF NOT EXISTS ria_new_cards (id integer PRIMARY KEY,
+                                                                item_photo TEXT,
+                                                                item_city TEXT,
+                                                                item_title TEXT,
+                                                                item_price TEXT,
+                                                                item_url TEXT,
+                                                                CONSTRAINT uc UNIQUE (item_photo, item_city, item_title,
+                                                                item_price, item_url))""")
+    olx_db.commit()
+    olx_db.close()

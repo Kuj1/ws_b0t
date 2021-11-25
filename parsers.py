@@ -67,6 +67,15 @@ def olx(url):
 
         data.append((item_id, item_photo, item_city, item_title, item_price, item_url))
 
+    olx_db = sqlite3.connect('db_archive/olx_item_cards_db')
+    cursor = olx_db.cursor()
+
+    cursor.executemany("""INSERT OR IGNORE INTO olx_new_cards
+                        (id, item_photo, item_city, item_title, item_price, item_url)
+                        VALUES(?, ?, ?, ?, ?, ?)""", (data[5],)).fetchall()
+
+    olx_db.commit()
+    cursor.close()
 
     return data[5]
 
@@ -95,14 +104,25 @@ def auto_ria(url):
     elif another_item_desk:
         another_item_cards = another_item_desk.find_all('section', class_='proposition')
         for another_item in another_item_cards:
-            another_item_id = another_item.find('a').get('href').replace('/newauto/auto-kia-sportage-', '').replace('.html', '')
+            another_item_id = another_item.find('a').get('href').replace('/newauto/auto-kia-sportage-', '')\
+                .replace('.html', '')
             another_item_photo = another_item.find('picture').find('img').get('src')
             another_item_city = another_item.find('span', class_='item region').text.strip()
             another_item_title = another_item.find('h3', class_='proposition_name').find('span').text.strip()
             another_item_price = another_item.find('div', class_='proposition_price').find('span').text.strip()
-            another_item_url =f"https://auto.ria.com{another_item.find('a').get('href')}"
+            another_item_url = f"https://auto.ria.com{another_item.find('a').get('href')}"
 
-            data.append((another_item_id, another_item_photo, another_item_city, another_item_title, another_item_price, another_item_url))
+            data.append((another_item_id, another_item_photo, another_item_city,
+                         another_item_title, another_item_price, another_item_url))
+
+    olx_db = sqlite3.connect('db_archive/ria_item_cards_db')
+    cursor = olx_db.cursor()
+
+    cursor.executemany("""INSERT OR IGNORE INTO ria_new_cards (id, item_photo, item_city, item_title, item_price, item_url)
+                        VALUES(?, ?, ?, ?, ?, ?)""", (data[0],)).fetchall()
+
+    olx_db.commit()
+    cursor.close()
 
     return data[0]
 

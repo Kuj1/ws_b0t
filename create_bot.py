@@ -7,4 +7,3 @@ config = load_config("config/ws_bot.ini")
 storage = MemoryStorage()
 bot = Bot(token=config.ws_bot.token)
 dp = Dispatcher(bot, storage=storage)
-
