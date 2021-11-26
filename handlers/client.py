@@ -101,7 +101,6 @@ async def create_link_olx(message: types.Message, state: FSMContext):
         url['url_olx'] = message.text
     await sql_add_link(state)
     data_res = []
-    # tmp = json.dumps(data_res)
 
     while run:
 

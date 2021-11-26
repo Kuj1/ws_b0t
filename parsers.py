@@ -16,7 +16,7 @@ def sql_output_olx_link():
     olx_db = sqlite3.connect('db_archive/olx_db')
     cursor = olx_db.cursor()
     for link in cursor.execute("""SELECT * FROM olx_links""").fetchall():
-        url_olx = link[0]
+        url_olx = link[0].replace('\'', '')
     return url_olx
 
 
